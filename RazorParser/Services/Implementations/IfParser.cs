@@ -7,15 +7,67 @@ using System.ComponentModel;
 
 namespace RazorParser
 {
-	public class IfParser
+	public class IfParser : IIfParser
 	{
-		public static bool Parse<T>(string condition, T model){
+		#region private fields
+		IModelParser _modelParser;
+		#endregion
+
+		#region .ctors
+
+		public IfParser(IModelParser modelParser){
+			_modelParser = modelParser;		
+		}
+		#endregion
+
+		#region public API
+		public string ParseInline<T> (string html, T model)
+		{
+			var pattern = @"@\(\s*(?'condition'.+)\s*\?\s*(?'true'[^ ]+)\s*:\s*(?'false'[^ ]+)\s*\)";
+
+			var a = Regex.Match(html, pattern);
+			while(Regex.IsMatch(html,pattern)){
+				var match = Regex.Match (html, pattern);
+				string result = "";
+				var condition = match.Groups ["condition"].Value;
+				if (Parse (condition, model)) {					
+					result = match.Groups ["true"].Value;
+				} else {
+					result = match.Groups ["false"].Value;
+				}
+				html = html.Replace (match.Value, result);
+
+			}
+			return html;
+		}
+
+		public string FindIfExpressions<T>(string html, T model){
+			var pattern = @"@if\s*((?'a'\()[^{]*)((?'condition-a'\)))\s*((?'b'{)([^ ]|\s)*?)((?'ifpart-b'}))(\s*}\s*else\s*((?'c'{)([^ ]|\s)*)((?'else-c'})))*";
+
+			var a = Regex.Match(html, pattern);
+			while(Regex.IsMatch(html,pattern)){
+				var match = Regex.Match (html, pattern);
+				string result = "";
+				var condition = match.Groups ["condition"].Value;
+				if (Parse (condition, model)) {					
+					result =  FindIfExpressions (match.Groups ["ifpart"].Value, model);
+				} else {
+					result = FindIfExpressions (match.Groups ["else"].Value, model);
+				}
+				html = html.Replace (match.Value, result);
+			}
+			return html;
+		}
+		#endregion
+
+		#region utility methods
+		bool Parse<T>(string condition, T model){
 			var exp = FindParentheses (condition, model);
 			var ifFunc = Expression.Lambda<Func<bool>> (exp).Compile ();
 			return ifFunc ();
 		}
 
-		static Expression FindParentheses<T> (string condition, T model)
+		Expression FindParentheses<T> (string condition, T model)
 		{
 			var pattern =  @"((?'b'\()([^ ]|\s)+?)((?'content-b'\)))";
 			var operands = new Dictionary<int, Expression> ();
@@ -34,7 +86,7 @@ namespace RazorParser
 			return BuildTree (operators, operands);
 		}
 
-		static void FillOperators (string condition, Dictionary<int, Operator>  operators)
+		void FillOperators (string condition, Dictionary<int, Operator>  operators)
 		{
 			var pattern =  @"(\|+|==|!=|>|<|=>|=<|&+)+";
 			foreach (var m in Regex.Matches (condition, pattern).Cast<Match> ()) {
@@ -42,7 +94,7 @@ namespace RazorParser
 			}
 		}
 
-		static void FillOperands<T> (string condition, Dictionary<int, Expression>  operands, T model)
+		void FillOperands<T> (string condition, Dictionary<int, Expression>  operands, T model)
 		{
 			//should skip parentheses 
 			var pattern =  @"\(.*?\)|([^ !<|&>=]+)";
@@ -53,12 +105,12 @@ namespace RazorParser
 				if (m.Groups [0].Value.Equals ("null")) {
 					operands.Add (m.Index, Expression.Constant (null));
 				} else {
-					operands.Add (m.Index, Expression.Constant (ModelParser.InjectSingleField(m.Groups [0].Value, model)));
+					operands.Add (m.Index, Expression.Constant (_modelParser.InjectSingleField(m.Groups [0].Value, model)));
 				}
 			}
 		}
 
-		static Expression BuildTree (Dictionary<int, Operator> operators, Dictionary<int, Expression> operands)
+		Expression BuildTree (Dictionary<int, Operator> operators, Dictionary<int, Expression> operands)
 		{
 			try{
 			foreach (var op in operators.OrderByDescending(s=>s.Value.Priority)) {
@@ -91,7 +143,7 @@ namespace RazorParser
 			return null;
 		}
 
-		static void FindNeighbours (int key, Dictionary<int, Expression> operands, out  Expression leftOperand, out  Expression rightOperand)
+		void FindNeighbours (int key, Dictionary<int, Expression> operands, out  Expression leftOperand, out  Expression rightOperand)
 		{
 			var leftNullable = operands
 				.Where (item => item.Key < key)
@@ -121,6 +173,7 @@ namespace RazorParser
 			operands.Remove (right.Key);
 			rightOperand = right.Value;
 		}
+		#endregion
 	}
 }
 

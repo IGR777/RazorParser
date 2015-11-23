@@ -39,9 +39,20 @@
     <Compile Include="ExpressionHelpers.cs" />
     <Compile Include="RazorText.cs" />
     <Compile Include="Operator.cs" />
-    <Compile Include="IfParser.cs" />
-    <Compile Include="ModelParser.cs" />
-    <Compile Include="ForeachParser.cs" />
+    <Compile Include="Services\ServiceLocator.cs" />
+    <Compile Include="Services\Interfaces\IModelLocator.cs" />
+    <Compile Include="Services\Implementations\ModelLocator.cs" />
+    <Compile Include="Services\Interfaces\IForeachParser.cs" />
+    <Compile Include="Services\Implementations\ForeachParser.cs" />
+    <Compile Include="Services\Interfaces\IIfParser.cs" />
+    <Compile Include="Services\Implementations\IfParser.cs" />
+    <Compile Include="Services\Interfaces\IModelParser.cs" />
+    <Compile Include="Services\Implementations\ModelParser.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Services\" />
+    <Folder Include="Services\Interfaces\" />
+    <Folder Include="Services\Implementations\" />
+  </ItemGroup>
 </Project>

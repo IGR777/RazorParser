@@ -6,9 +6,9 @@ using System.Linq;
 
 namespace RazorParser
 {
-	public static class ModelParser
+	public class ModelParser : IModelParser
 	{
-		public static string InjectModelFieldsInHtml<T> (string html, T model)
+		public string InjectModelFieldsInHtml<T> (string html, T model)
 		{
 			var pattern = @"@*Model.(?'PropertyName'[A-Za-z0-9]+)\.*(?'MethodName'[A-Za-z0-9]*)";
 			var props = model.GetType ().GetTypeInfo ().DeclaredProperties;
@@ -33,7 +33,7 @@ namespace RazorParser
 			return result;
 		}
 
-		static object GetStaticClass (string field)
+		object GetStaticClass (string field)
 		{
 			var pattern = @"@*(?'ClassName'[A-Za-z0-9]+)\.*(?'PropertyName'[A-Za-z0-9]+)*\.*(?'MethodName'[A-Za-z0-9]+)*";
 			var match = Regex.Match (field, pattern);
@@ -61,7 +61,7 @@ namespace RazorParser
 
 		}
 
-		static object GetModelValue<T> (string field, string pattern, T model)
+		object GetModelValue<T> (string field, string pattern, T model)
 		{
 
 			var props = model.GetType ().GetTypeInfo ().DeclaredProperties;
@@ -89,7 +89,7 @@ namespace RazorParser
 			return value;
 		}
 
-		public static object InjectSingleField<TModel> (string field, TModel model)
+		public object InjectSingleField<TModel> (string field, TModel model)
 		{
 			var pattern = @"@*Model.(?'PropertyName'[A-Za-z0-9]+)\.*(?'MethodName'[A-Za-z0-9]*)";
 			if (!Regex.IsMatch (field, pattern)) {
@@ -100,7 +100,7 @@ namespace RazorParser
 		}
 
 
-		static MethodInfo GetLinqExtensions(string methodName){
+		MethodInfo GetLinqExtensions(string methodName){
 			var method =  typeof(System.Linq.Enumerable)
 				.GetTypeInfo ()
 				.DeclaredMethods

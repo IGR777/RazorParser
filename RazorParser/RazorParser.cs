@@ -11,41 +11,12 @@ namespace RazorParser
 	public static class RazorParser
 	{
 		public static string Parse<T>(string html, T model){
-			var result = FindIfExpressions (html, model);
-			//			var result = InjectModelFields (html, model);
+			using (var modelLocator = ServiceLocator.Resolve<IModelLocator> ()) {
+				var ifParser = ServiceLocator.Resolve<IIfParser> ();
+				var result = ifParser.FindIfExpressions (html, model);
 
-			return result;
-		}
-
-		static string FindIfExpressions<T>(string html, T model){
-			try{
-				var pattern = @"@if\s*((?'a'\()[^{]*)((?'condition-a'\)))\s*((?'b'{)([^ ]|\s)*?)((?'ifpart-b'}))(\s*}\s*else\s*((?'c'{)([^ ]|\s)*)((?'else-c'})))*";
-//				var a = Regex.IsMatch (html, pattern);
-
-
-				var a = Regex.Match(html, pattern);
-				while(Regex.IsMatch(html,pattern)){
-					var match = Regex.Match (html, pattern);
-					string result = "";
-//					var condition = InjectModelFields(match.Groups ["condition"].Value, model);
-					var condition = match.Groups ["condition"].Value;
-					if (ExecuteExpression (condition, model)) {
-						result =  FindIfExpressions (match.Groups ["ifpart"].Value, model);
-					} else {
-						result = FindIfExpressions (match.Groups ["else"].Value, model);
-					}
-					html = html.Replace (match.Value, result);
-
-				}
-			}catch(Exception e){
+				return result;
 			}
-			return html;
-
-		}
-
-		static bool ExecuteExpression<T> (string value, T model)
-		{
-			return IfParser.Parse (value, model);
 		}
 	}
 
