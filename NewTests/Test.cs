@@ -13,15 +13,21 @@ namespace RazorParser.Tests
 		[Test,TestCaseSource (typeof(TestCasesClass), "TestCases")]
 		public string TestIfParser (string condition, object model)
 		{
-			var result = ServiceLocator.Resolve<IIfParser> ().FindIfExpressions (condition, model);
+			var result = ServiceLocator.Resolve<IIfParser> ().Parse (condition, model);
 			return result;
 		}
 
-		[Test,TestCaseSource (typeof(ModelTestCasesClass), "TestCases")]
-		public void TestModelParser (string condition, object model, int count)
+		[Test,TestCaseSource (typeof(ModelEnumerableTestCasesClass), "TestCases")]
+		public void TestModelParserEnumerable (string condition, object model, int count)
 		{
 			var en = ServiceLocator.Resolve<IModelParser> ().InjectSingleField (condition, model) as IEnumerable<object>;
 			Assert.AreEqual (en.Count (), count);
+		}
+
+		[Test,TestCaseSource (typeof(ModelSingleTestCasesClass), "TestCases")]
+		public string TestModelParserSingle (string condition, object model)
+		{
+			return ServiceLocator.Resolve<IModelParser> ().InjectSingleField (condition, model).ToString ();
 		}
 
 		[Test,TestCaseSource (typeof(ForeachTestCasesClass), "TestCases")]
@@ -68,6 +74,8 @@ namespace RazorParser.Tests
 				yield return new TestCaseData (@"@(Model.Gears != 0 ? Yes : No)", new{Gears = 0}).Returns ("No");
 				yield return new TestCaseData (@"@((Model.MOTExpiryDate != null && Model.MOTExpiryDate != DateTime.MinValue) ? Yes : No)"
 					, new { MOTExpiryDate = DateTime.Now}).Returns ("Yes");
+				yield return new TestCaseData (@"@(Model.LockingWheelNut ? Yes : No)", new{LockingWheelNut = false}).Returns ("No");
+
 			}
 		}
 	}
@@ -125,7 +133,7 @@ namespace RazorParser.Tests
 		}
 	}
 
-	public class ModelTestCasesClass
+	public class ModelEnumerableTestCasesClass
 	{
 		public static IEnumerable TestCases {
 			get {
@@ -136,6 +144,19 @@ namespace RazorParser.Tests
 					new EnumerableItem{ Id = 2, Description = "2" } 
 				}
 				}, 3);
+
+			}
+		}
+	}
+
+	public class ModelSingleTestCasesClass
+	{
+		public static IEnumerable TestCases {
+			get {
+				yield return new TestCaseData (@"@(Model.Seller.Code)", new {
+					Seller = new { Code = 123 } 
+				}).Returns ("123");
+
 			}
 		}
 	}

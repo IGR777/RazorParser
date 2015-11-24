@@ -35,7 +35,7 @@ namespace RazorParser
 				var match = Regex.Match (html, pattern);
 				string result = "";
 				var condition = match.Groups ["condition"].Value;
-				if (Parse (condition, model)) {					
+				if (ParseIfExpression (condition, model)) {					
 					result = match.Groups ["true"].Value;
 				} else {
 					result = match.Groups ["false"].Value;
@@ -46,7 +46,7 @@ namespace RazorParser
 			return html;
 		}
 
-		public string FindIfExpressions<T> (string html, T model)
+		public string Parse<T> (string html, T model)
 		{
 			var pattern = @"@if\s*((?'a'\()[^{]*)((?'condition-a'\)))\s*((?'b'{)([^ ]|\s)*?)((?'ifpart-b'}))(\s*}\s*else\s*((?'c'{)([^ ]|\s)*)((?'else-c'})))*";
 
@@ -55,10 +55,10 @@ namespace RazorParser
 				var match = Regex.Match (html, pattern);
 				string result = "";
 				var condition = match.Groups ["condition"].Value;
-				if (Parse (condition, model)) {					
-					result = FindIfExpressions (match.Groups ["ifpart"].Value, model);
+				if (ParseIfExpression (condition, model)) {					
+					result = Parse (match.Groups ["ifpart"].Value, model);
 				} else {
-					result = FindIfExpressions (match.Groups ["else"].Value, model);
+					result = Parse (match.Groups ["else"].Value, model);
 				}
 				html = html.Replace (match.Value, result);
 			}
@@ -69,7 +69,7 @@ namespace RazorParser
 
 		#region utility methods
 
-		bool Parse<T> (string condition, T model)
+		bool ParseIfExpression<T> (string condition, T model)
 		{
 			var exp = FindParentheses (condition, model);
 			var ifFunc = Expression.Lambda<Func<bool>> (exp).Compile ();

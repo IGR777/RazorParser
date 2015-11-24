@@ -9,7 +9,9 @@ namespace RazorParser
 	public class ForeachParser : IForeachParser
 	{
 		IModelParser _modelParser;
-		public ForeachParser(IModelParser modelParser){
+
+		public ForeachParser (IModelParser modelParser)
+		{
 			_modelParser = modelParser;
 		}
 
@@ -23,10 +25,11 @@ namespace RazorParser
 			try {
 				var pattern = @"@foreach\s*((?'a'\()[^{]*)((?'condition-a'\)))\s*((?'b'{)([^ ]|\s)*?)((?'content-b'}))";
 
-				IModelLocator modelLocator = ServiceLocator.Resolve<IModelLocator>();
-				var result = Regex.Replace(html, pattern, match=>{
+				IModelLocator modelLocator = ServiceLocator.Resolve<IModelLocator> ();
+				var result = Regex.Replace (html, pattern, match => {
 					var condition = match.Groups ["condition"].Value;
 					var content = match.Groups ["content"].Value;
+					Console.WriteLine ("FindForeachExpressions expression-{0}\ncontent-{1}", condition, content);
 					return ProceedForeachExpression (model, condition, content, modelLocator);
 				});
 				return result;
@@ -35,7 +38,7 @@ namespace RazorParser
 			}
 		}
 
-		string ProceedForeachExpression<T> (T model, string condition, string content,  IModelLocator modelLocator)
+		string ProceedForeachExpression<T> (T model, string condition, string content, IModelLocator modelLocator)
 		{
 			string result = "";
 			IEnumerable<object> enumerable;
@@ -47,7 +50,7 @@ namespace RazorParser
 			while (numerator.MoveNext ()) {
 				var current = numerator.Current;
 				var newKey = modelLocator.AddUntilAdded (stringEnumerator, current);
-				var subResult = ChangeModelNames (newKey, stringEnumerator,content);
+				var subResult = ChangeModelNames (newKey, stringEnumerator, content);
 				result += subResult + Environment.NewLine;
 			}
 			return result;
@@ -55,8 +58,8 @@ namespace RazorParser
 
 		string ChangeModelNames (string newKey, string oldKey, string content)
 		{
-			var pattern = @"@"+oldKey;
-			return Regex.Replace (content, pattern, "@"+newKey);
+			var pattern = @"@" + oldKey;
+			return Regex.Replace (content, pattern, "@" + newKey);
 		}
 
 		void FindForeachComponents<T> (string condition, T model, out string enumerator, out IEnumerable<object> enumerable)
