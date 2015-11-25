@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using System.Text;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace RazorParser
 {

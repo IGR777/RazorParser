@@ -36,24 +36,13 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RazorParser.cs" />
-    <Compile Include="ExpressionHelpers.cs" />
     <Compile Include="RazorText.cs" />
-    <Compile Include="Operator.cs" />
-    <Compile Include="Services\ServiceLocator.cs" />
-    <Compile Include="Services\Interfaces\IModelLocator.cs" />
-    <Compile Include="Services\Implementations\ModelLocator.cs" />
-    <Compile Include="Services\Interfaces\IForeachParser.cs" />
-    <Compile Include="Services\Implementations\ForeachParser.cs" />
-    <Compile Include="Services\Interfaces\IIfParser.cs" />
-    <Compile Include="Services\Implementations\IfParser.cs" />
-    <Compile Include="Services\Interfaces\IModelParser.cs" />
-    <Compile Include="Services\Implementations\ModelParser.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="Services\" />
-    <Folder Include="Services\Interfaces\" />
-    <Folder Include="Services\Implementations\" />
+    <ProjectReference Include="..\RazorParser.Core\RazorParser.Core.csproj">
+      <Project>{BE68F926-ACDA-4A22-B55F-3397A6AF16D9}</Project>
+      <Name>RazorParser.Core</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

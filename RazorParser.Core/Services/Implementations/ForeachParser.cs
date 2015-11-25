@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 
 namespace RazorParser
 {
@@ -29,7 +30,7 @@ namespace RazorParser
 				var result = Regex.Replace (html, pattern, match => {
 					var condition = match.Groups ["condition"].Value;
 					var content = match.Groups ["content"].Value;
-					Console.WriteLine ("FindForeachExpressions expression-{0}\ncontent-{1}", condition, content);
+					Debug.WriteLine ("FindForeachExpressions expression-{0}\ncontent-{1}", condition, content);
 					return ProceedForeachExpression (model, condition, content, modelLocator);
 				});
 				return result;

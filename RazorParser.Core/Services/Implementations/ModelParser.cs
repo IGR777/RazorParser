@@ -83,27 +83,11 @@ namespace RazorParser
 
 		#region utility fields
 
-		public static T ChangeType<T> (object value)
-		{
-			var t = typeof(T);
-
-			if (t.IsGenericType && t.GetGenericTypeDefinition ().Equals (typeof(Nullable<>))) {
-				if (value == null) { 
-					return default(T); 
-				}
-
-				t = Nullable.GetUnderlyingType (t);
-			}
-
-			return (T)Convert.ChangeType (value, t);
-		}
-
-
 		string ProceedBigData (object res, string other)
 		{
 			var acts = other.Split (new[]{ '.' }, StringSplitOptions.RemoveEmptyEntries);
 			foreach (var act in acts) {
-				if (act.Contains ('(')) {
+				if (act.Contains ("(")) {
 					res = CallMethod (res, act);
 				} else {
 					res = CallProperty (res, act);
@@ -164,7 +148,8 @@ namespace RazorParser
 				int intValue;
 				return Int32.TryParse (className, out intValue) ? (object)intValue : className;
 			}
-			var type = Assembly.GetAssembly (field.GetType ()).GetTypes ().FirstOrDefault (t => t.IsSealed && t.IsPublic && t.Name.Equals (className));
+
+			var type = field.GetType ().GetTypeInfo ().Assembly.ExportedTypes.FirstOrDefault (t => t.GetTypeInfo ().IsSealed && t.GetTypeInfo ().IsPublic && t.Name.Equals (className));
 			if (type == null)
 				throw new ArgumentException (String.Format ("ModelParser GetStaticClass - class not found", className));
 			var member = type.GetRuntimeField (firstMemberName);

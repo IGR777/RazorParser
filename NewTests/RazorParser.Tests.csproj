@@ -42,9 +42,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RazorParser\RazorParser.csproj">
-      <Project>{DBEE0626-0322-4390-9044-BB112BF76AE6}</Project>
-      <Name>RazorParser</Name>
+    <ProjectReference Include="..\RazorParser.Core\RazorParser.Core.csproj">
+      <Project>{BE68F926-ACDA-4A22-B55F-3397A6AF16D9}</Project>
+      <Name>RazorParser.Core</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

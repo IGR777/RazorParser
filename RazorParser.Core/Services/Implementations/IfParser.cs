@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.ComponentModel;
 
 namespace RazorParser
@@ -156,9 +157,9 @@ namespace RazorParser
 					var right = rightOperand as ConstantExpression;
 					var left = leftOperand as ConstantExpression;
 
-					if (right != null && left != null && ((right.Value == null && left.Type.IsValueType) || (left.Value == null && right.Type.IsValueType))) {
+					if (right != null && left != null && ((right.Value == null && left.Type.GetTypeInfo ().IsValueType) || (left.Value == null && right.Type.GetTypeInfo ().IsValueType))) {
 						//should cast value type to nullable
-						if (left.Type.IsValueType) {
+						if (left.Type.GetTypeInfo ().IsValueType) {
 							exp = Expression.MakeBinary (op.Value.Type, Expression.Constant (left.Value, typeof(Nullable<>).MakeGenericType (left.Type)), right);
 						} else {
 							exp = Expression.MakeBinary (op.Value.Type, Expression.Constant (right.Value, typeof(Nullable<>).MakeGenericType (right.Type)), left);
